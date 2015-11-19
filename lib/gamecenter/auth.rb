@@ -88,7 +88,7 @@ EOCACERT
       true
     end
 
-    # Verifies that the public key url originates from one of Apple's secured servers
+    # Verifies that the public key url originates from one of Apple's secured servers.
     # @param [String] public_key_url The publicKeyURL property returned from the GameKit framework
     # @return [Boolean] true if url verification was successful, false if url fails verification
     def verify_public_key_url(public_key_url)
@@ -103,7 +103,7 @@ EOCACERT
       url_ok
     end
 
-    # Checks if given public key certificate can be verified with the CA certificate
+    # Checks if given public key certificate can be verified with the CA certificate.
     # @param [OpenSSL::X509::Certificate] public_key_cert a previously fetched public key certificate object
     # @return [Boolean] true if certificate could be verified against the CA certificate, false if it couldn't
     def verify_public_key_certificate(public_key_cert)
@@ -113,7 +113,7 @@ EOCACERT
       verified && no_errors
     end
 
-    # Verifies the signature of given payload with given public key certificate
+    # Verifies the signature of given payload with given public key certificate.
     # @param [OpenSSL:X509::Certificate] public_key_cert a previously fetched public key certificate object
     # @param [String] signature the signature to be verified
     # @param [String] payload the payload to verify the signature for
