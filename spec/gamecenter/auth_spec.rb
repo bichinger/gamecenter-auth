@@ -68,9 +68,9 @@ EOCERT
   end
 
   describe '#get_public_key_certificate' do
-    it 'tests the hardcoded cert' do
+    it 'test the hardcoded cert' do
       expect(@cert).to be_an_instance_of OpenSSL::X509::Certificate
-      expect(Time.now <=> @cert.not_after).to eq(-1)
+      expect(@cert.not_after > Time.now).to eq(true)
     end
   end
 
