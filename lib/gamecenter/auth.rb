@@ -132,7 +132,8 @@ EOCACERT
       if @@cache_public_keys
         # caching is enabled
         cache = (@@_public_key_cache ||= {})
-        unless cert = cache[public_key_url] && cert.not_after > Time.now
+        cert = cache[public_key_url]
+        unless cert && cert.not_after > Time.now
           # no cache hit or certificate expired
           cache.delete public_key_url
 
