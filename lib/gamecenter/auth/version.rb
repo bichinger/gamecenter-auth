@@ -1,5 +1,5 @@
 module Gamecenter
-  module Auth
-    VERSION = "0.1.0"
+  class Auth
+    VERSION = '1.0.0'
   end
 end
