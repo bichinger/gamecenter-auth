@@ -52,11 +52,15 @@ dAUK75fDiSKxH3fzvc1D1PFMqT+1i4SvZPLQFCE=
 -----END CERTIFICATE-----
 EOCACERT
 
-    def logger
-      @@logger ||= Logger.new(STDERR)
-    end
-
-    # TODO doc
+    # Verifies the identity of the given player. Takes all return values from GameKit's generateIdentityVerificationSignatureWithCompletionHandler method.
+    # @see https://developer.apple.com/library/prerelease/ios/documentation/GameKit/Reference/GKLocalPlayer_Ref/index.html#//apple_ref/occ/instm/GKLocalPlayer/generateIdentityVerificationSignatureWithCompletionHandler:
+    # @param [String] player_id the playerID from the player to verify identity of
+    # @param [String] bundle_id the app's bundleID
+    # @param [String] public_key_url the publicKeyURL property returned from the GameKit framework
+    # @param [String] signature the signature property returned from the GameKit framework
+    # @param [String] salt the salt property returned from the GameKit framework
+    # @param [Integer] timestamp the timestamp property returned from the GameKit framework
+    # @return [Boolean] true if player could be verified, false if not
     def verify_player(player_id, bundle_id, public_key_url, signature, salt, timestamp)
       unless verify_public_key_url public_key_url
         logger.debug { "public key url invalid: #{public_key_url}" }
@@ -85,8 +89,8 @@ EOCACERT
     end
 
     # Verifies that the public key url originates from one of Apple's secured servers
-    # @param public_key_url The publicKeyUrl property returned from the GameKit framework
-    # @return true if url verification was successful, false if url fails verification
+    # @param [String] public_key_url The publicKeyURL property returned from the GameKit framework
+    # @return [Boolean] true if url verification was successful, false if url fails verification
     def verify_public_key_url(public_key_url)
       url_ok = false
       begin
@@ -99,7 +103,9 @@ EOCACERT
       url_ok
     end
 
-    # TODO doc
+    # Checks if given public key certificate can be verified with the CA certificate
+    # @param [OpenSSL::X509::Certificate] public_key_cert a previously fetched public key certificate object
+    # @return [Boolean] true if certificate could be verified against the CA certificate, false if it couldn't
     def verify_public_key_certificate(public_key_cert)
       verified = public_key_cert.verify(@@ca_certificate.public_key)
       no_errors = OpenSSL.errors.empty? # this method has to be called always as it empties the OpenSSL error stack
@@ -107,7 +113,11 @@ EOCACERT
       verified && no_errors
     end
 
-    # TODO doc
+    # Verifies the signature of given payload with given public key certificate
+    # @param [OpenSSL:X509::Certificate] public_key_cert a previously fetched public key certificate object
+    # @param [String] signature the signature to be verified
+    # @param [String] payload the payload to verify the signature for
+    # @return [Boolean] true if signature is valid for given certificate and payload, false if it isn't
     def verify_signature(public_key_cert, signature, payload)
       verified = public_key_cert.public_key.verify(OpenSSL::Digest::SHA256.new, signature, payload)
       no_errors = OpenSSL.errors.empty? # this method has to be called always as it empties the OpenSSL error stack
@@ -115,13 +125,17 @@ EOCACERT
       verified && no_errors
     end
 
-    # TODO doc
+    # Get a public key certificate for given URL. Caches the results, depending on the configuration.
+    # @param [String] public_key_url the URL of the certificate to fetch
+    # @return [OpenSSL::X509::Certificate] certificate found at given URL or nil if there was an error
     def get_public_key_certificate(public_key_url)
       if @@cache_public_keys
         # caching is enabled
         cache = (@@_public_key_cache ||= {})
-        unless cert = cache[public_key_url]
-          # no cache hit
+        unless cert = cache[public_key_url] && cert.not_after > Time.now
+          # no cache hit or certificate expired
+          cache.delete public_key_url
+
           cert = request_public_key_certificate public_key_url
 
           available_entries = @@public_key_cache_entries - cache.size
@@ -142,8 +156,9 @@ EOCACERT
       end
     end
 
-    # TODO doc
-    # @return An instance of OpenSSL::X509::Certificate or nil if there was an error
+    # Fetch a certificate from given URL.
+    # @param [String] public_key_url the URL to fetch the certificate from
+    # @return [OpenSSL::X509::Certificate] certificate found at given URL or nil if there was an error
     def request_public_key_certificate(public_key_url)
       uri = URI.parse public_key_url
       begin
@@ -165,6 +180,12 @@ EOCACERT
       end
 
       nil
+    end
+
+    private
+
+    def logger
+      @@logger ||= Logger.new(STDERR)
     end
 
   end
