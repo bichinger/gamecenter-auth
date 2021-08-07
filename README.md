@@ -2,6 +2,8 @@
 
 Ruby gem for iOS GameKit/Game Center player authentication using the "Identity Verification Signature" provided by the generateIdentityVerificationSignatureWithCompletionHandler method in Apple's GameKit framework 
 
+This gem fully replaces the gamekit-auth-ruby gem previously available at https://rubygems.org/gems/gamekit-auth-ruby and https://github.com/bichinger/gamekit-auth-ruby.
+
 ## Installation
 
 Add this line to your application's Gemfile:
